@@ -1,5 +1,5 @@
 [package]
-name = "evlog"
+name = "evlog-rs"
 version = "0.1.0"
 edition = "2021"
 description = "Structured logging with wide events for Rust. Accumulate context, emit once."
