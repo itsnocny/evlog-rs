@@ -1,7 +1,7 @@
 #[macro_use]
 extern crate rocket;
 
-use evlog::{frameworks::rocket::EvlogFairing, json, Config, LoggerHandle, init_logger};
+use evlog_rs::{frameworks::rocket::EvlogFairing, json, Config, LoggerHandle, init_logger};
 
 #[get("/")]
 fn handler(log: LoggerHandle) -> &'static str {

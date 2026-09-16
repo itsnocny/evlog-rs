@@ -1,5 +1,5 @@
-use evlog::{init_logger, Config};
-use evlog::simple::log;
+use evlog_rs::{init_logger, Config};
+use evlog_rs::simple::log;
 use serde_json::json;
 
 fn main() {

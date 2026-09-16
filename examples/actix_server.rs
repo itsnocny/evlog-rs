@@ -1,5 +1,5 @@
 use actix_web::{web, App, HttpMessage, HttpRequest, HttpServer};
-use evlog::{frameworks::actix::EvlogMiddleware, json, Config, LoggerHandle, init_logger};
+use evlog_rs::{frameworks::actix::EvlogMiddleware, json, Config, LoggerHandle, init_logger};
 
 async fn handler(req: HttpRequest) -> &'static str {
     // Actix request extensions

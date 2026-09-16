@@ -1,4 +1,4 @@
-use evlog::{EventLogger, init_logger, Config, json};
+use evlog_rs::{EventLogger, init_logger, Config, json};
 
 fn main() {
     init_logger(

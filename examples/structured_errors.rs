@@ -1,5 +1,5 @@
-use evlog::{EventLogger, init_logger, Config, json};
-use evlog::error::EvlogError;
+use evlog_rs::{EventLogger, init_logger, Config, json};
+use evlog_rs::error::EvlogError;
 
 fn process_payment() -> Result<(), EvlogError> {
     Err(EvlogError::new("Payment failed")

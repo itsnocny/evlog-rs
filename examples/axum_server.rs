@@ -1,8 +1,8 @@
 use axum::{routing::get, Extension, Router};
-use evlog::{frameworks::axum::EvlogLayer, json, Config, LoggerHandle, init_logger, define_error_catalog};
+use evlog_rs::{frameworks::axum::EvlogLayer, json, Config, LoggerHandle, init_logger, define_error_catalog};
 use tokio::net::TcpListener;
 use std::time::Duration;
-use evlog::event::Event;
+use evlog_rs::event::Event;
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt, Registry};
 
 define_error_catalog! {
@@ -17,7 +17,7 @@ define_error_catalog! {
     }
 }
 
-evlog::dump_schemas!(".evlog_schema.md", ApiError);
+evlog_rs::dump_schemas!(".evlog_schema.md", ApiError);
 
 async fn health_handler() -> &'static str {
     "OK"
@@ -69,7 +69,7 @@ async fn main() {
 
     // Initialisation du pont tracing -> evlog
     Registry::default()
-        .with(evlog::frameworks::tracing::TracingBridge)
+        .with(evlog_rs::frameworks::tracing::TracingBridge)
         .init();
 
     let app = Router::new()
