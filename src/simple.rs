@@ -39,6 +39,7 @@ pub mod log {
     }
 }
 
+#[cfg(feature = "tracing")]
 pub(crate) fn log_from_tracing(
     level: Level,
     tag: &str,
