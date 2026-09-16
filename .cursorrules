@@ -1,0 +1,35 @@
+# Evlog-Rust AI Rules
+# ===================
+# This file provides essential context for AI assistants working on a Rust project using `evlog`.
+
+1. **Structured Wide Events over scattered logs**:
+   Do NOT use `println!`, `eprintln!`, `log::info!`, or `tracing::info!` for business-level events (unless specifically instructed for external ecosystem interop). Use the `evlog` asynchronous injection system.
+   Example:
+   Instead of: `tracing::info!("User logged in with id {}", user_id)`
+   Do: `log.set("user_id", user_id);` (Assuming `log: &LoggerHandle` is available in context).
+
+2. **Errors**:
+   If you need to return an error, DO NOT construct a generic `anyhow::anyhow!("...")` or a raw string error.
+   Always check the `.evlog_schema.md` (or the equivalent auto-generated AI errors catalog file) for existing errors in the domain.
+   If the error does not exist, add it to the `define_error_catalog!` macro with a clear `why` (cause) and `fix` (actionable advice).
+   To trigger an error log and wide event finalization, use `log.error_evlog(&ApiError::YourError.into_evlog());`.
+
+3. **Performance Metrics**:
+   To measure execution time of a specific sub-task without cluttering the logs, wrap it in a track block:
+   ```rust
+   let data = log.track_async("fetch_db", async {
+       db.fetch().await
+   }).await;
+   ```
+   This will automatically append `{ metrics: { fetch_db: 45.2 } }` to the final wide event.
+
+4. **Background Tasks**:
+   When spawning a background `tokio::spawn`, always detach the context using `.fork()` so it does not pollute the parent HTTP request wide event.
+   ```rust
+   let bg_log = log.fork();
+   tokio::spawn(async move {
+       bg_log.set("job", "email");
+       // ...
+       bg_log.emit();
+   });
+   ```
