@@ -247,9 +247,50 @@ rocket::build()
     .mount("/", routes![index])
 ```
 
+### Tracing Bridge
+
+If your dependencies emit logs via the [`tracing`](https://docs.rs/tracing) crate, you can funnel them into evlog using `TracingBridge`. Enable the `tracing` feature and register the bridge as a layer:
+
+```toml
+[dependencies]
+evlog = { version = "0.1", features = ["axum", "tracing"] }
+tracing-subscriber = { version = "0.3", features = ["registry"] }
+```
+
+```rust
+use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt, Registry};
+use evlog::frameworks::tracing::TracingBridge;
+
+Registry::default()
+    .with(TracingBridge)
+    .init();
+
+// tracing events are now captured and emitted as evlog events
+tracing::info!(user_id = 42, "User logged in");
+```
+
+> [!WARNING]
+> Do **not** combine `TracingBridge` with `tracing_subscriber::fmt::layer()` in the same `Registry`. Both layers receive every event independently — `tracing-subscriber` has no interception mechanism — so each `tracing` event would be printed twice: once by `fmt` and once by evlog.
+>
+> ```rust
+> // ❌ double output — don't do this
+> Registry::default()
+>     .with(tracing_subscriber::fmt::layer())
+>     .with(TracingBridge)
+>     .init();
+>
+> // ✅ pick one
+> Registry::default()
+>     .with(TracingBridge)  // routes everything through evlog
+>     .init();
+> ```
+
+Why not adding an interception mechanism ? Simply because if you use opentelemetry, sentry or another layer it would silence them
+
 ## Output Formats
 
 **Development** (pretty, tree format with colors):
+
 ```
 14:08:56.932 [app] Server starting on port 3000
 14:08:56.932 WARN [cache] Cache miss for key user:42
@@ -268,8 +309,18 @@ ERROR POST /api/checkout in 123ms
 ```
 
 **Production** (JSON):
+
 ```json
-{"level":"info","timestamp":"2024-01-15T14:08:56Z","service":"my-app","method":"POST","path":"/api/checkout","duration_ms":234,"user":{"id":1,"plan":"pro"},"cart":{"items":3,"total":99.99}}
+{
+  "level": "info",
+  "timestamp": "2024-01-15T14:08:56Z",
+  "service": "my-app",
+  "method": "POST",
+  "path": "/api/checkout",
+  "duration_ms": 234,
+  "user": { "id": 1, "plan": "pro" },
+  "cart": { "items": 3, "total": 99.99 }
+}
 ```
 
 ## Configuration
